@@ -27,6 +27,16 @@ it(@"checks for a method", ^{
     [sut method];
 });
 
+it(@"checks for a async method", ^{
+    @mockify(sut);
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [sut method];
+    });
+    
+    expect(sut).will.receive(@selector(method));
+});
+
 it(@"checks for a return object", ^{
     @mockify(sut);
     expect(sut).receive(@selector(method2)).returning(@2);
@@ -72,6 +82,15 @@ it(@"fails when method is not called", ^{
     [sut method];
 });
 
+it(@"fails when async method is not called", ^{
+    @mockify(sut);
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [sut method];
+    });
+
+    expect(sut).will.receive(@selector(method2));
+});
 
 it(@"fails with the wrong return value", ^{
     @mockify(sut);

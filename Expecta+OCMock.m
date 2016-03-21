@@ -5,6 +5,7 @@
 #import <OCMock/OCMExpectationRecorder.h>
 #import <OCMock/OCMStubRecorder.h>
 #import <OCMock/OCMInvocationStub.h>
+#import <OCMock/OCMInvocationExpectation.h>
 
 #import <objc/runtime.h>
 #import <XCTest/XCTest.h>
@@ -71,7 +72,8 @@
 
 - (BOOL)matches:(id)actual
 {
-    return YES;
+    OCMInvocationExpectation *exp = (OCMInvocationExpectation *)[_selectorCheckRecorder invocationMatcher];
+    return !self.expectation.asynchronous || [exp isSatisfied];
 }
 
 - (void)dealloc
