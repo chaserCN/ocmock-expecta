@@ -5,10 +5,13 @@
 @end
 
 @implementation ORObject
-- (void)method {};
+- (void)method1 {};
 - (NSNumber *)method2 { return @2; };
 - (void)method3:(NSString *)argument {};
 - (NSInteger)method4 { return 23; };
+- (void)method5:(NSString *)argument1 arg2:(NSNumber *)argument2 {};
+
+- (void)method11:(NSString *)argument1 arg2:(NSInteger)argument2 {};
 
 @end
 
@@ -20,38 +23,38 @@ before(^{
     sut = [[ORObject alloc] init];
 });
 
-it(@"checks for a method", ^{
+pending(@"checks for a method", ^{
     @mockify(sut);
 
-    expect(sut).to.receive(@selector(method));
-    [sut method];
+    expect(sut).method(method1).to.beCalled();
+    [sut method1];
 });
 
-it(@"checks for a async method", ^{
+pending(@"checks for a async method", ^{
     @mockify(sut);
     
     dispatch_async(dispatch_get_main_queue(), ^{
-        [sut method];
+        [sut method1];
     });
     
-    expect(sut).will.receive(@selector(method));
+    expect(sut).method(method1).will.beCalled();
 });
 
-it(@"checks for a return object", ^{
+pending(@"checks for a return object", ^{
     @mockify(sut);
-    expect(sut).receive(@selector(method2)).returning(@2);
+    expect(sut).method(method2).returning(@2).to.beCalled();
     [sut method2];
 });
 
-it(@"checks for a return value bridged to an object", ^{
+pending(@"checks for a return value bridged to an object", ^{
     @mockify(sut);
-    expect(sut).receive(@selector(method4)).returning(@23);
+    expect(sut).method(method4).returning(@23).to.beCalled();
     [sut method4];
 });
 
-it(@"checks for an argument to the method", ^{
+pending(@"checks for an argument to the method", ^{
     @mockify(sut);
-    expect(sut).receive(@selector(method3:)).with(@[@"thing"]);
+    expect(sut).method(method3:).with(@[@"thing"]).to.beCalled();
     [sut method3:@"thing"];
 });
 
@@ -63,45 +66,68 @@ beforeEach(^{
     b = [[ORObject alloc] init];
 });
 
-it(@"supports multiple invocations of @mockify", ^{
+pending(@"supports multiple invocations of @mockify", ^{
     @mockify(a)
     @mockify(b)
 
-    expect(a).receive(@selector(method3:)).with(@[@"a"]);
-    expect(b).receive(@selector(method3:)).with(@[@"b"]);
+    
+    expect(a).method(method3:).with(@[@"a"]).to.beCalled();
+    expect(b).method(method3:).with(@[@"b"]).to.beCalled();
 
     [a method3:@"a"];
     [b method3:@"b"];
 });
 
-/// It is expected that these tests will fail. That means they work properly
+pending(@"supports multiple invocations of @mockify", ^{
+    @mockify(a)
+    @mockify(b)
 
-it(@"fails when method is not called", ^{
-    @mockify(sut);
-    expect(sut).receive(@selector(method2));
-    [sut method];
-});
-
-it(@"fails when async method is not called", ^{
-    @mockify(sut);
+    //expect(2).to.equal(2);
     
-    dispatch_async(dispatch_get_main_queue(), ^{
-        [sut method];
+    expect(a).method(method5:arg2:).with2(@"a", @2).to.beCalled();
+    expect(b).method(method5:arg2:).with2(@"b", @2).to.beCalled();
+    
+    [a method5:@"a" arg2:@1];
+    [b method5:@"b" arg2:@2];
+});
+
+fit(@"supports multiple invocations of @mockify", ^{
+    @mockify(a)
+    @mockify(b)
+    
+    expect(a).method(method11:arg2:).with2(@"a", EXPObjectify(2)).to.beCalled();
+    
+    [a method11:@"a" arg2:1];
+});
+
+pending(@"It is expected that these tests will fail. That means they work properly", ^{
+    it(@"fails when method is not called", ^{
+        @mockify(sut);
+        expect(sut).method(method2).to.beCalled();
+        [sut method1];
     });
-
-    expect(sut).will.receive(@selector(method2));
-});
-
-it(@"fails with the wrong return value", ^{
-    @mockify(sut);
-    expect(sut).receive(@selector(method2)).returning(@3);
-    [sut method2];
-});
-
-it(@"fails with the wrong argument value", ^{
-    @mockify(sut);
-    expect(sut).receive(@selector(method3:)).with(@[@"thingy"]);
-    [sut method3:@"thing"];
+    
+    it(@"fails when async method is not called", ^{
+        @mockify(sut);
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [sut method1];
+        });
+        
+        expect(sut).method(method2).will.beCalled();
+    });
+    
+    it(@"fails with the wrong return value", ^{
+        @mockify(sut);
+        expect(sut).method(method2).returning(@3).to.beCalled();
+        [sut method2];
+    });
+    
+    it(@"fails with the wrong argument value", ^{
+        @mockify(sut);
+        expect(sut).method(method3:).with(@[@"thingy"]).to.beCalled();
+        [sut method3:@"thing"];
+    });
 });
 
 SpecEnd

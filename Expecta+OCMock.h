@@ -1,16 +1,24 @@
 #import <Expecta/Expecta.h>
 #import <OCMock/OCMock.h>
 
+#define any() [OCMArg any]
+#define method(x)  selector(@selector(x))
+
 @interface EXPExpect (receiveMatcher)
 
 /// Expect an object to recieve a selector
-@property (nonatomic, readonly) EXPExpect *(^ receive) (SEL);
+@property (nonatomic, readonly) EXPExpect *(^ selector) (SEL);
 
 /// Expectations around the arguments recieved
 @property (nonatomic, readonly) EXPExpect *(^ with) (NSArray *);
 
+@property (nonatomic, readonly) EXPExpect *(^ with2) (id firstObject, ...);
+
 /// Expectations around the arguments recieved
 @property (nonatomic, readonly) EXPExpect *(^ returning) (id);
+
+/// Expectations around the arguments recieved
+@property (nonatomic, readonly) EXPExpect *(^ beCalled) (void);
 
 @end;
 

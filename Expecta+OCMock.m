@@ -10,6 +10,10 @@
 #import <objc/runtime.h>
 #import <XCTest/XCTest.h>
 
+#import "EXPMatchers+equal.h"
+
+NSUInteger KWSelectorParameterCount(SEL selector);
+
 @interface OCMExpectationRecorder (Private)
 - (OCMInvocationStub *)stub;
 @end
@@ -141,20 +145,16 @@
 
 @implementation EXPExpect (receiveMatcher)
 
-@dynamic receive;
+@dynamic selector;
 
-- (EXPExpect *(^) (SEL)) receive {
-    __block id actual = self.actual;
-
+- (EXPExpect *(^) (SEL)) selector {
     ORExpectaOCMockMatcher *matcher = [[ORExpectaOCMockMatcher alloc] initWithExpectation:self];
     objc_setAssociatedObject(self, @selector(_expectaOCMatcher), matcher, OBJC_ASSOCIATION_RETAIN);
 
     EXPExpect *(^matcherBlock) (SEL selector) = [^ (SEL selector) {
-        matcher.selector = selector;
 
+        matcher.selector = selector;
         [matcher updateMatcher];
-        actual = matcher.mock;
-        [self applyMatcher:matcher to:&actual];
 
         return self;
 
@@ -180,6 +180,50 @@
     return  matcherBlock;
 }
 
+@dynamic with2;
+
+- (EXPExpect *(^) (id firstObject, ...)) with2 {
+    
+    EXPExpect *(^matcherBlock) (id firstObject, ...) = [^ (id firstArgument, ...) {
+        
+        ORExpectaOCMockMatcher *matcher = objc_getAssociatedObject(self, @selector(_expectaOCMatcher));
+
+        va_list argumentList;
+        va_start(argumentList, firstArgument);
+
+        matcher.arguments = [self argumentsAsArrayForSelector:matcher.selector firstArgument:firstArgument argumentList:argumentList];
+
+        [matcher updateMatcher];
+        
+        return self;
+        
+    } copy];
+    
+    return  matcherBlock;
+}
+
+- (NSArray *)argumentsAsArrayForSelector:(SEL)aSelector firstArgument:(id)firstArgument argumentList:(va_list)argumentList {
+    NSUInteger count = KWSelectorParameterCount(aSelector);
+    NSMutableArray *array = [NSMutableArray arrayWithCapacity:count];
+    [array addObject:(firstArgument != nil) ? firstArgument : [OCMArg isNil]];
+    
+    for (NSUInteger i = 1; i < count; ++i)
+    {
+        id object = va_arg(argumentList, id);
+        [array addObject:(object != nil) ? [self checkerForObject:object] : [OCMArg isNil]];
+    }
+    
+    va_end(argumentList);
+    return array;
+}
+
+- (id)checkerForObject:(id)anObject {
+    return [OCMArg checkWithBlock:^BOOL(id value) {
+        expect(value)._equal(anObject);
+        return true;
+    }];
+}
+
 @dynamic returning;
 
 - (EXPExpect *(^) (id)) returning {
@@ -197,5 +241,34 @@
     return  matcherBlock;
 }
 
+@dynamic beCalled;
+
+- (EXPExpect *(^) (void)) beCalled {
+    
+    EXPExpect *(^matcherBlock) (void) = [^ (void) {
+        
+        ORExpectaOCMockMatcher *matcher = objc_getAssociatedObject(self, @selector(_expectaOCMatcher));
+        id actual = matcher.mock;
+        [self applyMatcher:matcher to:&actual];
+        
+        return self;
+        
+    } copy];
+    
+    return  matcherBlock;
+}
 
 @end
+
+NSUInteger KWSelectorParameterCount(SEL selector) {
+    NSString *selectorString = NSStringFromSelector(selector);
+    NSUInteger length = [selectorString length];
+    NSUInteger parameterCount = 0;
+    
+    for (NSUInteger i = 0; i < length; ++i) {
+        if ([selectorString characterAtIndex:i] == ':')
+            ++parameterCount;
+    }
+    
+    return parameterCount;
+}
