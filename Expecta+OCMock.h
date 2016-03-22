@@ -1,36 +1,21 @@
 #import <Expecta/Expecta.h>
 #import <OCMock/OCMock.h>
+#import "EXMStubs.h"
 
-#define any() [OCMArg any]
+#define any() [EXMAny any]
 #define method(x)  selector(@selector(x))
+#define returning(x) returningObj(EXPObjectify(x))
 
 @interface EXPExpect (receiveMatcher)
 
-/// Expect an object to recieve a selector
 @property (nonatomic, readonly) EXPExpect *(^ selector) (SEL);
 
-/// Expectations around the arguments recieved
-@property (nonatomic, readonly) EXPExpect *(^ with) (NSArray *);
+/// If you need to pass a scalar, you may wrap it by EXPObjectify. Or use EXPObjectify's output, like @3 for 3
+@property (nonatomic, readonly) EXPExpect *(^ with) (id firstObject, ...);
 
-@property (nonatomic, readonly) EXPExpect *(^ with2) (id firstObject, ...);
+@property (nonatomic, readonly) EXPExpect *(^ returningObj) (id);
 
-/// Expectations around the arguments recieved
-@property (nonatomic, readonly) EXPExpect *(^ returning) (id);
-
-/// Expectations around the arguments recieved
 @property (nonatomic, readonly) EXPExpect *(^ beCalled) (void);
 
 @end;
 
- // Concatenates A and B
-#define mockify_concat(A, B) A ## B
-
-// This is the @mockify, I used the same technique as libextobjc by using a @try{} @catch with no
-// @ to absorb the initial @.
-
-#define mockify(OBJ) \
-        try {} @finally {} \
-        \
-        typeof(OBJ) mockify_concat(OBJ, _original_) = OBJ; \
-        OBJ = [OCMockObject partialMockForObject:mockify_concat(OBJ, _original_)]; \
-        \
