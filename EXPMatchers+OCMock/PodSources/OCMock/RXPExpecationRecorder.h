@@ -7,9 +7,8 @@
 //
 
 #import "OCMExpectationRecorder.h"
-#import "EXMInvocationExpectation.h"
 
-@interface EXMExpecationRecorder : OCMExpectationRecorder
+@interface RXPExpecationRecorder : OCMExpectationRecorder
 
 - (void)recordArguments:(NSArray *)theArguments;
 - (void)recordReturning:(id)aReturning;

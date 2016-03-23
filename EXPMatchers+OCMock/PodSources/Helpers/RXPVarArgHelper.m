@@ -6,20 +6,16 @@
 //
 //
 
-#import "EXMVarArgHelper.h"
-#import "ExpectaObject.h"
-#import "EXMStubs.h"
+#import "RXPVarArgHelper.h"
+#import "RXPObjectify.h"
 
-// TODO: delete
-#import "ExpectaSupport.h"
-
-@implementation EXMVarArgHelper
+@implementation RXPVarArgHelper
 
 + (NSArray *)objectifiedArgumentsOfSelector:(SEL)aSelector firstArgument:(id)firstArgument argumentList:(va_list)argumentList {
     NSUInteger count = [self selectorParameterCount:aSelector];
 
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:count];
-    [array addObject:[self objectFromArgument:firstArgument]];
+    [array addObject:RXPObjectify(firstArgument)];
     
     for (NSUInteger i = 1; i < count; ++i) {
         id argument = va_arg(argumentList, id);
@@ -27,16 +23,12 @@
         if (argument == [EXMArgStop value])
             break;
             
-        id object = [self objectFromArgument:argument];
+        id object = RXPObjectify(argument);
         [array addObject:object];
     }
     
     va_end(argumentList);
     return array;
-}
-
-+ (id)objectFromArgument:(id)anArgument {
-    return anArgument ? EXPObjectify(anArgument) : [EXMNil value];
 }
 
 // Copied from Kiwi

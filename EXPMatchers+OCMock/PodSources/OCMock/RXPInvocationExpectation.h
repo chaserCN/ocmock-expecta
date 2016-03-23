@@ -8,7 +8,7 @@
 
 #import "OCMInvocationExpectation.h"
 
-@interface EXMInvocationExpectation : OCMInvocationExpectation
+@interface RXPInvocationExpectation : OCMInvocationExpectation
 @property (nonatomic, strong) NSArray *objectifiedArguments;
 @property (nonatomic, strong) id objectifiedReturning;
 

@@ -1,8 +1,8 @@
-#import "Expecta+OCMock.h"
-#import "ORExpectaOCMockMatcher.h"
+#import "Expecta+Receive.h"
+#import "RXPExpectaMatcher.h"
 
 @interface EXPExpect (receiveMatcherPrivate)
-@property (nonatomic, strong) ORExpectaOCMockMatcher *matcher;
+@property (nonatomic, strong) RXPExpectaMatcher *matcher;
 @end
 
 @implementation EXPExpect (receiveMatcher)
@@ -10,7 +10,7 @@
 @dynamic method;
 
 - (EXPExpect *(^) (SEL)) method {
-    self.matcher = [[ORExpectaOCMockMatcher alloc] initWithExpectation:self];
+    self.matcher = [[RXPExpectaMatcher alloc] initWithExpectation:self];
 
     return ^(SEL selector) {
         self.matcher.selector = selector;
@@ -45,7 +45,7 @@
 
 - (EXPExpect *(^) (void)) beCalled {
     return ^{
-        ORExpectaOCMockMatcher *matcher = self.matcher;
+        RXPExpectaMatcher *matcher = self.matcher;
         id mock = matcher.mock;
 
         [matcher setNegative:self.negative];
@@ -59,11 +59,11 @@
 
 #pragma mark -
 
-- (ORExpectaOCMockMatcher *)matcher {
+- (RXPExpectaMatcher *)matcher {
     return objc_getAssociatedObject(self, @selector(matcher));
 }
 
-- (void)setMatcher:(ORExpectaOCMockMatcher *)aMatcher {
+- (void)setMatcher:(RXPExpectaMatcher *)aMatcher {
     objc_setAssociatedObject(self, @selector(matcher), aMatcher, OBJC_ASSOCIATION_RETAIN);
 }
 

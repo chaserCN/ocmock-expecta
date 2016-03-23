@@ -7,9 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "EXMStubs.h"
 
-@interface EXMVarArgHelper : NSObject
+@interface RXPVarArgHelper : NSObject
 
 + (NSArray *)objectifiedArgumentsOfSelector:(SEL)aSelector firstArgument:(id)firstArgument argumentList:(va_list)argumentList;
 

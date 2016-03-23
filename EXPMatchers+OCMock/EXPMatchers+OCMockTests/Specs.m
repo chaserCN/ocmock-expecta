@@ -17,6 +17,12 @@
 - (void)method11:(NSString *)argument1 arg2:(NSInteger)argument2 {};
 - (void)method12:(NSString *)argument1 arg2:(NSInteger)arg2 arg3:(NSInteger)arg3 arg4:(NSInteger)arg4 {};
 
+- (void)method15:(CGRect)aRect {}
+- (void)method14:(CGSize)aSize selector:(SEL)aSelector {}
+- (SEL)method17i1 {return @selector(method1);}
+
+- (id)method19 {return nil;}
+
 @end
 
 SpecBegin(ExpectaOCMockMatchers)
@@ -25,6 +31,30 @@ __block ORObject *sut;
 
 before(^{
     sut = [[ORObject alloc] init];
+});
+
+it(@"CGSize", ^{
+    expect(sut)
+        .method(method14:selector:)
+        .with(CGSizeMake(11, 34), @selector(method))
+        .to.beCalled();
+    
+    [sut method14:CGSizeMake(11, 34) selector:@selector(method)];
+});
+
+it(@"CGRect", ^{
+    expect(sut).method(method15:).with(CGRectMake(11, 34, 15, 57)).to.beCalled();
+    [sut method15:CGRectMake(11, 34, 15, 57)];
+});
+
+it(@"selector", ^{
+    expect(sut).method(method17i1).returning(@selector(method1)).to.beCalled();
+    [sut method17i1];
+});
+
+fit(@"selector", ^{
+    expect(sut).method(method19).returning(nil).to.beCalled();
+    [sut method19];
 });
 
 it(@"checks for a method", ^{
@@ -116,7 +146,7 @@ it(@"2 expects in one block", ^{
     [a method1];
 });
 
-pending(@"It is expected that these tests will fail. That means they work properly", ^{
+context(@"It is expected that these tests will fail. That means they work properly", ^{
     it(@"fails when method is not called", ^{
         expect(sut).method(method2).to.beCalled();
         [sut method1];

@@ -9,7 +9,7 @@
 #import <Expecta/Expecta.h>
 #import <OCMock/OCPartialMockObject.h>
 
-@interface ORExpectaOCMockMatcher : NSObject <EXPMatcher>
+@interface RXPExpectaMatcher : NSObject <EXPMatcher>
 
 @property (nonatomic, strong) OCPartialMockObject *mock;
 

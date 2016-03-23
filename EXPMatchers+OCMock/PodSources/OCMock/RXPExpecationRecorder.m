@@ -6,18 +6,19 @@
 //
 //
 
-#import "EXMExpecationRecorder.h"
+#import "RXPExpecationRecorder.h"
+#import "RXPInvocationExpectation.h"
 
-@interface EXMExpecationRecorder()
-@property (nonatomic, strong, readonly) EXMInvocationExpectation *invocationExpectation;
+@interface RXPExpecationRecorder()
+@property (nonatomic, strong, readonly) RXPInvocationExpectation *invocationExpectation;
 @end
 
-@implementation EXMExpecationRecorder
+@implementation RXPExpecationRecorder
 
 - (instancetype)init {
     self = [super init];
     if (self) {
-        invocationMatcher = [[EXMInvocationExpectation alloc] init];
+        invocationMatcher = [[RXPInvocationExpectation alloc] init];
     }
     return self;
 }
@@ -41,8 +42,8 @@
     return self.invocationExpectation.isSatisfied;
 }
 
-- (EXMInvocationExpectation *)invocationExpectation {
-    return (EXMInvocationExpectation *)invocationMatcher;
+- (RXPInvocationExpectation *)invocationExpectation {
+    return (RXPInvocationExpectation *)invocationMatcher;
 }
 
 @end

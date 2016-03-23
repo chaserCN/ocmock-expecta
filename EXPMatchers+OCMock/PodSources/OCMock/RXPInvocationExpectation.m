@@ -6,16 +6,16 @@
 //
 //
 
-#import "EXMInvocationExpectation.h"
-#import "EXMExpectifyHelper.h"
-#import "EXMStubs.h"
+#import "RXPInvocationExpectation.h"
+#import "NSInvocation+expecta_receive.h"
+#import "RXPObjectify.h"
 
-@interface EXMInvocationExpectation()
+@interface RXPInvocationExpectation()
 @property (nonatomic, assign) BOOL argumentsSatisfied;
 @property (nonatomic, assign) BOOL returningSatisfied;
 @end
 
-@implementation EXMInvocationExpectation
+@implementation RXPInvocationExpectation
 
 - (BOOL)isSatisfied {
     return self.argumentsSatisfied && self.returningSatisfied;
@@ -26,7 +26,7 @@
 - (BOOL)matchesInvocation:(NSInvocation *)anInvocation {
     if ([self needToCheckInvocation:anInvocation]) {
         self.argumentsSatisfied = [self matchesArgumentsOfInvocation:anInvocation];
-        self.returningSatisfied = [self doesMethodReturnVoid];
+        self.returningSatisfied = ([self expectingMethodToReturnVoid] == YES);
         return self.argumentsSatisfied;
     }
     return NO;
@@ -51,7 +51,7 @@
     return YES;
 }
 
-- (BOOL)doesMethodReturnVoid {
+- (BOOL)expectingMethodToReturnVoid {
     return self.objectifiedReturning == nil;
 }
 
@@ -64,10 +64,10 @@
     NSUInteger limit = MIN(signature.numberOfArguments, recordedArguments.count+2);
     
     for (NSUInteger i = 2; i < limit; i++) {
-        id recordedArg = recordedArguments[i-2];
-        id arg = [EXMExpectifyHelper objectifyArgOfInvocation:anInvocation atIndex:i];
+        id recorded = recordedArguments[i-2];
+        id passed = [anInvocation rxp_objectifyArgWithIndex:i];
         
-        if (![self matchesRecordedArgument:recordedArg withPassed:arg])
+        if (![self matchesRecordedArgument:recorded withPassed:passed])
             return NO;
     }
     
@@ -81,7 +81,7 @@
     if ([aRecorded isProxy])
         return [aRecorded isEqual:aPassed];
     
-    return [EXMExpectifyHelper objectified:aRecorded equalTo:aPassed];
+    return RXPObjectifiedEqual(aRecorded, aPassed);
 }
 
 #pragma mark -
@@ -92,8 +92,8 @@
     if (!recorded)
         return YES;
     
-    id passed = [EXMExpectifyHelper objectifyReturnOfInvocation:aInvocation];
-    return [EXMExpectifyHelper objectified:recorded equalTo:passed];
+    id passed = [aInvocation rxp_objectifyReturnValue];
+    return RXPObjectifiedEqual(recorded, passed);
 }
 
 @end

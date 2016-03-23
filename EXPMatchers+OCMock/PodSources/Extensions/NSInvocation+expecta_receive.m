@@ -1,47 +1,26 @@
 //
-//  ORExpectaOCMockSupport.m
+//  NSInvocation+expecta_receive.m
 //  Pods
 //
-//  Created by Nicolas on 3/22/16.
+//  Created by Nicolas on 3/23/16.
 //
 //
 
-#import "EXMExpectifyHelper.h"
-#import "EXPMatcherHelpers.h"
-#import "ExpectaSupport.h"
-#import "EXMStubs.h"
+#import "NSInvocation+expecta_receive.h"
+#import "RXPObjectify.h"
 
-@implementation  EXMExpectifyHelper : NSObject
+@implementation NSInvocation (expecta_receive)
 
-// Implementation copied from Expecta
-+ (BOOL)objectified:(id)o1 equalTo:(id)o2 {
-    if ((o1 == o2) || [o1 isEqual:o2]) {
-        return YES;
-    } else if([o1 isKindOfClass:[NSNumber class]] && [o2 isKindOfClass:[NSNumber class]]) {
-        if([o1 isKindOfClass:[NSDecimalNumber class]] || [o2 isKindOfClass:[NSDecimalNumber class]]) {
-            NSDecimalNumber *o1DecimalNumber = [NSDecimalNumber decimalNumberWithDecimal:[(NSNumber *) o1 decimalValue]];
-            NSDecimalNumber *o2DecimalNumber = [NSDecimalNumber decimalNumberWithDecimal:[(NSNumber *) o2 decimalValue]];
-            return [o1DecimalNumber isEqualToNumber:o2DecimalNumber];
-        }
-        else {
-            if(EXPIsNumberFloat((NSNumber *)o1) || EXPIsNumberFloat((NSNumber *)o2)) {
-                return [(NSNumber *)o1 floatValue] == [(NSNumber *)o2 floatValue];
-            }
-        }
-    }
-    return NO;
-}
-
-// Implementation is modified ReactiveCocoa's code
-+ (id)objectifyReturnOfInvocation:(NSInvocation *)inv {
+- (id)rxp_objectifyReturnValue {
     #define WRAP_AND_RETURN(type) \
     do { \
-        type val = 0; \
-        [inv getReturnValue:&val]; \
-        return _EXPObjectify(returnType, val); \
+        type val; \
+        [self getReturnValue:&val]; \
+        return _RXPObjectify(returnType, val); \
     } while (0)
     
-    const char *returnType = inv.methodSignature.methodReturnType;
+    const char *returnType = self.methodSignature.methodReturnType;
+
     // Skip const type qualifier.
     if (returnType[0] == 'r') {
         returnType++;
@@ -49,8 +28,8 @@
     
     if (strcmp(returnType, @encode(id)) == 0 || strcmp(returnType, @encode(Class)) == 0 || strcmp(returnType, @encode(void (^)(void))) == 0) {
         __autoreleasing id returnObj;
-        [inv getReturnValue:&returnObj];
-        return returnObj;
+        [self getReturnValue:&returnObj];
+        return RXPObjectify(returnObj);
     } else if (strcmp(returnType, @encode(char)) == 0) {
         WRAP_AND_RETURN(char);
     } else if (strcmp(returnType, @encode(int)) == 0) {
@@ -81,36 +60,40 @@
         WRAP_AND_RETURN(const char *);
     } else if (strcmp(returnType, @encode(void)) == 0) {
         return nil;
+    } else if (strcmp(returnType, @encode(SEL)) == 0) {
+        WRAP_AND_RETURN(SEL);
+    } else if (strcmp(returnType, @encode(NSRange)) == 0) {
+        WRAP_AND_RETURN(NSRange);
+    } else if (strcmp(returnType, @encode(CGPoint)) == 0) {
+        WRAP_AND_RETURN(CGPoint);
+    } else if (strcmp(returnType, @encode(CGSize)) == 0) {
+        WRAP_AND_RETURN(CGSize);
+    } else if (strcmp(returnType, @encode(CGRect)) == 0) {
+        WRAP_AND_RETURN(CGRect);
+    } else if (strcmp(returnType, @encode(CGColorRef)) == 0) {
+        WRAP_AND_RETURN(CGColorRef);
     } else {
         NSUInteger valueSize = 0;
         NSGetSizeAndAlignment(returnType, &valueSize, NULL);
         
         unsigned char valueBytes[valueSize];
-        [inv getReturnValue:valueBytes];
+        [self getReturnValue:valueBytes];
         
-        return [NSValue valueWithBytes:valueBytes objCType:returnType];
+        return _RXPObjectify(returnType, valueBytes);
     }
     
-    return nil;
-    
-#undef WRAP_AND_RETURN
+    #undef WRAP_AND_RETURN
 }
 
-+ (id)objectifyArgOfInvocation:(NSInvocation *)inv atIndex:(NSUInteger)index {
-    id obj = [self objectifyArgOfInvocation2:inv atIndex:index];
-    return obj ? obj : [EXMNil value];
-}
-
-// Implementation is modified ReactiveCocoa's code
-+ (id)objectifyArgOfInvocation2:(NSInvocation *)inv atIndex:(NSUInteger)index {
+- (id)rxp_objectifyArgWithIndex:(NSUInteger)index {
     #define WRAP_AND_RETURN(type) \
     do { \
-        type val = 0; \
-        [inv getArgument:&val atIndex:(NSInteger)index]; \
-        return _EXPObjectify(argType, val); \
+        type val; \
+        [self getArgument:&val atIndex:(NSInteger)index]; \
+        return _RXPObjectify(argType, val); \
     } while (0)
-    
-    const char *argType = [inv.methodSignature getArgumentTypeAtIndex:index];
+
+    const char *argType = [self.methodSignature getArgumentTypeAtIndex:index];
     // Skip const type qualifier.
     if (argType[0] == 'r') {
         argType++;
@@ -118,8 +101,8 @@
     
     if (strcmp(argType, @encode(id)) == 0 || strcmp(argType, @encode(Class)) == 0) {
         __autoreleasing id returnObj;
-        [inv getArgument:&returnObj atIndex:(NSInteger)index];
-        return returnObj;
+        [self getArgument:&returnObj atIndex:(NSInteger)index];
+        return RXPObjectify(returnObj);
     } else if (strcmp(argType, @encode(char)) == 0) {
         WRAP_AND_RETURN(char);
     } else if (strcmp(argType, @encode(int)) == 0) {
@@ -148,24 +131,33 @@
         WRAP_AND_RETURN(BOOL);
     } else if (strcmp(argType, @encode(char *)) == 0) {
         WRAP_AND_RETURN(const char *);
+    } else if (strcmp(argType, @encode(SEL)) == 0) {
+        WRAP_AND_RETURN(SEL);
+    } else if (strcmp(argType, @encode(NSRange)) == 0) {
+        WRAP_AND_RETURN(NSRange);
+    } else if (strcmp(argType, @encode(CGPoint)) == 0) {
+        WRAP_AND_RETURN(CGPoint);
+    } else if (strcmp(argType, @encode(CGSize)) == 0) {
+        WRAP_AND_RETURN(CGSize);
+    } else if (strcmp(argType, @encode(CGRect)) == 0) {
+        WRAP_AND_RETURN(CGRect);
+    } else if (strcmp(argType, @encode(CGColorRef)) == 0) {
+        WRAP_AND_RETURN(CGColorRef);
     } else if (strcmp(argType, @encode(void (^)(void))) == 0) {
         __unsafe_unretained id block = nil;
-        [inv getArgument:&block atIndex:(NSInteger)index];
-        return [block copy];
+        [self getArgument:&block atIndex:(NSInteger)index];
+        return RXPObjectify([block copy]);
     } else {
         NSUInteger valueSize = 0;
         NSGetSizeAndAlignment(argType, &valueSize, NULL);
         
         unsigned char valueBytes[valueSize];
-        [inv getArgument:valueBytes atIndex:(NSInteger)index];
+        [self getArgument:valueBytes atIndex:(NSInteger)index];
         
-        return [NSValue valueWithBytes:valueBytes objCType:argType];
+        return _RXPObjectify(argType, valueBytes);
     }
     
-    return nil;
-    
-#undef WRAP_AND_RETURN
+    #undef WRAP_AND_RETURN
 }
 
 @end
-

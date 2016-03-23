@@ -6,32 +6,31 @@
 //
 //
 
-#import "ORExpectaOCMockMatcher.h"
+#import "RXPExpectaMatcher.h"
 
 #import <OCMock/OCPartialMockObject.h>
 #import <OCMock/OCMFunctionsPrivate.h>
 
-#import "EXMExpecationRecorder.h"
+#import "RXPExpecationRecorder.h"
 
-#import "EXMExpectifyHelper.h"
-#import "EXMVarArgHelper.h"
+#import "RXPVarArgHelper.h"
 
-@interface ORExpectaOCMockMatcher()
+@interface RXPExpectaMatcher()
 @property (nonatomic, assign) SEL selector;
 
 @property (nonatomic, assign) int lineNumber;
 @property (nonatomic, assign) const char *fileName;
 
-@property (nonatomic, assign) BOOL negative; // expecta resets its negative and async properties. i need them in dealloc
+@property (nonatomic, assign) BOOL negative; // expecta resets its negative and async properties. still need them in dealloc
 @property (nonatomic, assign) BOOL asynchronous;
 
 @property (nonatomic, weak) EXPExpect *expectation;
-@property (nonatomic, strong) EXMExpecationRecorder *expectRecorder;
+@property (nonatomic, strong) RXPExpecationRecorder *expectRecorder;
 
 @end
 
 
-@implementation ORExpectaOCMockMatcher
+@implementation RXPExpectaMatcher
 
 - (instancetype)initWithExpectation:(EXPExpect *)expectation {
     self = [super init];
@@ -45,7 +44,7 @@
         if (!_mock)
             _mock = [OCMockObject partialMockForObject:expectation.actual];
 
-        _expectRecorder = [[EXMExpecationRecorder alloc] initWithMockObject:_mock];
+        _expectRecorder = [[RXPExpecationRecorder alloc] initWithMockObject:_mock];
         [_expectRecorder andForwardToRealObject];
     }
     
@@ -79,7 +78,7 @@
 }
 
 - (void)setArgument:(id)firstArgument list:(va_list)argumentList {
-    NSArray *args = [EXMVarArgHelper objectifiedArgumentsOfSelector:self.selector
+    NSArray *args = [RXPVarArgHelper objectifiedArgumentsOfSelector:self.selector
                                                       firstArgument:firstArgument
                                                        argumentList:argumentList];
     [self.expectRecorder recordArguments:args];

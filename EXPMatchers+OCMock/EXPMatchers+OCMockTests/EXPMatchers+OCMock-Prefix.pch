@@ -12,7 +12,7 @@
 #include <Specta/Specta.h>
 #include <Expecta/Expecta.h>
 #include <OCMock/OCMock.h>
-#include "Expecta+OCMock.h"
+#include "Expecta+Receive.h"
 #import <XCTest/XCTest.h>
 
 #define assertPass(expr) \
