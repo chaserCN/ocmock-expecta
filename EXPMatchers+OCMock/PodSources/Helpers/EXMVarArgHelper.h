@@ -11,6 +11,6 @@
 
 @interface EXMVarArgHelper : NSObject
 
-+ (NSArray *)argumentsAsArrayForSelector:(SEL)aSelector firstArgument:(id)firstArgument argumentList:(va_list)argumentList;
++ (NSArray *)objectifiedArgumentsOfSelector:(SEL)aSelector firstArgument:(id)firstArgument argumentList:(va_list)argumentList;
 
 @end

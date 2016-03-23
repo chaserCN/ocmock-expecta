@@ -16,3 +16,7 @@
 + (instancetype)any;
 @end
 
+@interface EXMArgStop : NSObject
++ (instancetype)value;
+@end
+

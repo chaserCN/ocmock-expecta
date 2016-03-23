@@ -38,3 +38,19 @@
 }
 
 @end
+
+@implementation EXMArgStop : NSObject
+
++ (instancetype)value {
+    static EXMArgStop *value;
+    static dispatch_once_t onceToken;
+    
+    dispatch_once(&onceToken, ^{
+        value = [self new];
+    });
+    
+    return value;
+}
+
+@end
+

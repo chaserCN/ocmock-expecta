@@ -8,13 +8,14 @@
 
 #import "EXMVarArgHelper.h"
 #import "ExpectaObject.h"
+#import "EXMStubs.h"
 
 // TODO: delete
 #import "ExpectaSupport.h"
 
 @implementation EXMVarArgHelper
 
-+ (NSArray *)objectifiedArgumentsSelector:(SEL)aSelector firstArgument:(id)firstArgument argumentList:(va_list)argumentList {
++ (NSArray *)objectifiedArgumentsOfSelector:(SEL)aSelector firstArgument:(id)firstArgument argumentList:(va_list)argumentList {
     NSUInteger count = [self selectorParameterCount:aSelector];
 
     NSMutableArray *array = [NSMutableArray arrayWithCapacity:count];
@@ -22,6 +23,10 @@
     
     for (NSUInteger i = 1; i < count; ++i) {
         id argument = va_arg(argumentList, id);
+        
+        if (argument == [EXMArgStop value])
+            break;
+            
         id object = [self objectFromArgument:argument];
         [array addObject:object];
     }

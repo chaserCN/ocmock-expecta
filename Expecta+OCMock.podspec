@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.source       = { :git => 'https://github.com/dblock/ocmock-expecta.git', :tag => s.version.to_s }
   s.platform     = :ios, '7.0'
   s.requires_arc = true
-  s.source_files = 'Expecta+OCMock.{h,m}'
+  s.source_files = 'EXPMatchers+OCMock/PodSources/**/*.{h,m}'
   s.frameworks   = 'Foundation', 'XCTest'
   s.dependency 'Expecta'
   s.dependency 'OCMock'

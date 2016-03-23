@@ -7,9 +7,9 @@
 
 @implementation EXPExpect (receiveMatcher)
 
-@dynamic selector;
+@dynamic method;
 
-- (EXPExpect *(^) (SEL)) selector {
+- (EXPExpect *(^) (SEL)) method {
     self.matcher = [[ORExpectaOCMockMatcher alloc] initWithExpectation:self];
 
     return ^(SEL selector) {
@@ -32,9 +32,9 @@
 }
 
 
-@dynamic returningObj;
+@dynamic returning;
 
-- (EXPExpect *(^) (id)) returningObj {
+- (EXPExpect *(^) (id)) returning {
     return ^(id object) {
         self.matcher.returning = object;
         return self;
@@ -47,6 +47,9 @@
     return ^{
         ORExpectaOCMockMatcher *matcher = self.matcher;
         id mock = matcher.mock;
+
+        [matcher setNegative:self.negative];
+        [matcher setAsynchronous:self.asynchronous];
 
         [self applyMatcher:matcher to:&mock];
         
